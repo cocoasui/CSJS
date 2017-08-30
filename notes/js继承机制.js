@@ -89,6 +89,7 @@ var CS = {
      * return:Function 类型。派生类。
      */
     Extend:function(objBase,objMemberSet){
+        //派生类默认构造函数。
         var derrivedClass = function(config){
             objBase.Apply(this,arguments);
         };
