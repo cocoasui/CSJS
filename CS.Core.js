@@ -1,25 +1,3 @@
-function BaseClass(){
-    //可以在构造函数中处理私有成员。
-    this.VarInBase = "Handle variable in constructor";
-}
-
-//基类声明公有成员、私有成员。
-BaseClass.prototype.VarInBase = "Variable In BaseClass";
-BaseClass.prototype.CommonVarInBase = "Common Variable In BaseClass";
-
-function DerrivedClass(){
-}
-
-/**
- * 将派生类的 prototype 指向[根据基类的 prototype 生成的空对象]。
- * Object.create(BaseClass.prototype)会生成一个 BaseClass 的对象，但是这个对象没有 BaseClass 的私有成员。
- */
-DerrivedClass.prototype = Object.create(BaseClass.prototype);
-DerrivedClass.prototype.constructor = DerrivedClass;
-
-//设定完派生类的 prototype 之后，声明派生类的公有成员、私有成员。
-DerrivedClass.prototype.VarInBase = "Variable In DerrivedClass";
-DerrivedClass.prototype.CommonVarInDerrived = "Common Variable In DerrivedClass";
 
 var CS = {
     /**
@@ -44,17 +22,66 @@ var CS = {
      * return:Function 类型。派生类。
      */
     Extend:function(objBase,objMemberSet){
-        var derrivedClass = function(config){
-            objBase.Apply(this,arguments);
-        };
+        try{
+            //检查参数
+            if(true){
+                if((objBase instanceof Function) == false){
+                    throw new Error("[objBase] must be Function");
+                }
 
-        if(objMemberSet.hasOwnProperty("constructor")){
-            derrivedClass = objMemberSet.constructor;
+                if(objMemberSet == null){
+                    throw new Error("[objMemberSet] can not be null!");
+                }
+            }
+
+            var derrivedClass = function(objConfig){
+                //初始化成员
+                this._InitMember(objConfig);
+
+                //其他需要在构造函数中执行的代码
+                this._Constructor(objConfig);
+            };
+            
+            derrivedClass.prototype = Object.create(objBase.prototype);
+            derrivedClass.prototype.constructor = derrivedClass;
+            CS.Apply(derrivedClass.prototype,objMemberSet);
+            derrivedClass.prototype.BaseType = objBase;
+            return derrivedClass;
+        }
+        catch(ex){
+            throw "CS.Extend():" + ex.message + "\r\n";
         }
         
-        derrivedClass.prototype = Object.create(objBase.prototype);
-        derrivedClass.prototype.constructor = derrivedClass;
-        CS.Apply(derrivedClass.prototype,objMemberSet);
-        return derrivedClass;
     }
 }
+
+/**
+ * 建立最顶层基类。其他自定义类都是由其派生。
+ * paras:
+ *      objConfig:Object 类型。参数集合。
+ */
+CS.Base = function(objConfig){
+    //初始化成员
+    this._InitMember(objConfig);
+    //执行其他代码
+    this._Constructor(objConfig);
+};
+
+//该类的基类。
+CS.Base.prototype.BaseType = null;
+
+/**
+ * 初始化对象成员。
+ * paras:
+ *      objConfig:Object 类型。参数集合。
+ */
+CS.Base.prototype._InitMember = function(objConfig){};
+
+/**
+ * 用于执行需要在构造函数中执行的代码。
+ * paras:
+ *      objConfig:Object 类型。参数集合。
+ */
+CS.Base.prototype._Constructor = function(objConfig){};
+
+

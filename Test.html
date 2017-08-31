@@ -1,7 +1,33 @@
-<Doctype html/>
+<!DOCTYPE HTML>
 <html>
 <head>
+    <meta http-equiv="keywords" content="keyword1,keyword2"/>
+	<meta http-equiv="description" content=""/>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="Content-Language" content="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="stylesheet" type="text/css" href=""/>
+	<title></title>
     <script src="CS.Core.js"></script>
+    <script type="text/javascript">
+        Animal = CS.Extend(CS.Base,{
+            ClassName:"Animal",
+            Move:function(){
+                console.log("Move");
+            }
+        });
+
+        Cat = CS.Extend(Animal,{
+            ClassName:"Cat",
+            Color:"",
+            _InitMember:function(objConfig){
+                this.Color = objConfig.Color;
+            },
+            CatchMouse:function(){
+                console.log("Catch mouse");
+            }
+        });
+    </script>
 </head>
 <body></body>
 </html>
