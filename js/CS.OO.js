@@ -1,19 +1,5 @@
 
-var CS = {
-    /**
-     * 将来源对象的自身属性赋给目标对象。
-     * paras:
-     *      objTarget:Object 类型。目标对象。
-     *      objSource:Object 类型。来源对象。
-     */
-    Apply:function(objTarget,objSource){
-        for(var item in objSource){
-            if(objSource.hasOwnProperty(item)){
-                objTarget[item] = objSource[item];
-            }
-        }
-    },
-
+CS.Apply(CS,{
     /**
      * 根据传入的[基类]和[派生类的成员]，创建派生类。
      * paras:
@@ -34,26 +20,20 @@ var CS = {
                 }
             }
 
-            var derrivedClass = function(objConfig){
-                //初始化成员
-                this._InitMember(objConfig);
-
-                //其他需要在构造函数中执行的代码
-                this._Constructor(objConfig);
-            };
+            var CSDefineType = CS.Base;
             
-            derrivedClass.prototype = Object.create(objBase.prototype);
-            derrivedClass.prototype.constructor = derrivedClass;
-            CS.Apply(derrivedClass.prototype,objMemberSet);
-            derrivedClass.prototype.BaseType = objBase;
-            return derrivedClass;
+            CSDefineType.prototype = Object.create(objBase.prototype);
+            CSDefineType.prototype.constructor = CSDefineType;
+            CS.Apply(CSDefineType.prototype,objMemberSet);
+            CSDefineType.prototype.BaseType = objBase;
+            return CSDefineType;
         }
         catch(ex){
             throw "CS.Extend():" + ex.message + "\r\n";
         }
         
     }
-}
+});
 
 /**
  * 建立最顶层基类。其他自定义类都是由其派生。
@@ -66,6 +46,9 @@ CS.Base = function(objConfig){
     //执行其他代码
     this._Constructor(objConfig);
 };
+
+//该类的名称。
+CS.Base.prototype.ClassName = "CS.Base";
 
 //该类的基类。
 CS.Base.prototype.BaseType = null;

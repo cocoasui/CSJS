@@ -101,19 +101,13 @@ var CS = {
                 }
             }
 
-            var derrivedClass = function(objConfig){
-                //初始化成员
-                this._InitMember(objConfig);
-
-                //其他需要在构造函数中执行的代码
-                this._Constructor(objConfig);
-            };
+            var CSDefineType = CS.Base;
             
-            derrivedClass.prototype = Object.create(objBase.prototype);
-            derrivedClass.prototype.constructor = derrivedClass;
-            CS.Apply(derrivedClass.prototype,objMemberSet);
-            derrivedClass.prototype.BaseType = objBase;
-            return derrivedClass;
+            CSDefineType.prototype = Object.create(objBase.prototype);
+            CSDefineType.prototype.constructor = CSDefineType;
+            CS.Apply(CSDefineType.prototype,objMemberSet);
+            CSDefineType.prototype.BaseType = objBase;
+            return CSDefineType;
         }
         catch(ex){
             throw "CS.Extend():" + ex.message + "\r\n";

@@ -1,0 +1,85 @@
+html,body{
+	width:100%;
+	height:100%;
+	margin:0px;
+	box-sizing:border-box;
+}
+
+div,span,label,input,select,table,tr,td,a,ul,ui,button,img,audio,video,object,embed{
+	box-sizing:border-box;
+}
+
+#cs-viewport{
+	width:100%;
+	height:100%;
+	display:flex;
+	flex-direction:column;
+}
+
+#cs-header{
+	display:flex;
+	justify-content:center;
+	align-items:center;
+	flex:0 0 auto;
+	background-color:antiquewhite;
+}
+
+#cs-title{
+	color:purple;
+	font-family:cursive;
+	font-size:40px;
+	font-style:italic;
+}
+
+#cs-body{
+	flex:1 0 auto;
+	background-color:palegoldenrod;
+}
+
+#cs-footer{
+	flex:0 0 auto;
+	display:flex;
+	justify-content:center;
+	align-items:center;
+	background-color:yellowgreen;
+}
+
+#cs-copyright{
+	font-style:italic;
+	font-size:small;
+}
+
+.cs-mask{
+	position:fixed;
+	width:100%;
+	height:100%;
+	left:0px;
+	top:0px;
+	background-color:lightgray;
+	z-index:1000;
+	opacity:0.7;
+	justify-content:center;
+	align-items:center;
+	display:flex;
+}
+
+.cs-mask-text{
+	position:relative;
+	color:blue;
+	font-family:cursive;
+	font-size:20px;
+}
+
+.cs-hor-center{
+	margin-left:auto;
+	margin-right:auto;
+}
+
+.cs-fieldTitle{
+	text-align:right;
+}
+
+.cs-notEmptyTag{
+	color:red;
+}
+
