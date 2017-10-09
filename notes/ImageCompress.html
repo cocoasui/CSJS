@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
+	<meta http-equiv='Content-Language' content='UTF-8'/>
+	<meta name='author' content='Cocoa'/>
+	<meta name='copyright' content='Cocoa'/>
+	<meta name='description' content=''/>
+	<meta name='keywords' content=''/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title></title>
+	<style>
+		html{
+			width:100%;
+			height:100%;
+			margin:0px;
+		}
+		body{
+			width:100%;
+			height:100%;
+			margin:0px;
+		}
+	</style>
+	<script>
+		function Init(){
+			document.getElementById("ImageFile").addEventListener("change",ReadImage);
+		}
+
+		function ReadImage(event){
+
+			if (event.target.files.length == 0){ return; }
+			var file = event.target.files[0];
+			var objFR = new FileReader();
+			objFR.readAsDataURL(file);
+			objFR.onload = function(event){
+				console.log("压缩前，图片 base64 长度：" + event.target.result.length);
+				alert("压缩前，图片 base64 长度：" + event.target.result.length);
+
+				var objImage = new Image();
+				objImage.src = event.target.result;
+				objImage.onload = function(event){
+					var intWidth = event.target.width;
+					var intHeight = event.target.height;
+					//var objCanvas = document.createElement("canvas");
+					var objCanvas = document.getElementById("Canvas1");
+					var objContext = objCanvas.getContext("2d");
+
+					if (intWidth > 1024){
+						intHeight = parseInt(intHeight * (1024/intWidth),10);
+						intWidth = 1024;
+					}
+
+					if (intHeight > 1024){
+						intWidth = parseInt(intWidth * (1024/intHeight),10);
+						intHeight = 1024;
+					}
+
+					objCanvas.width = intWidth;
+					objCanvas.height = intHeight;
+
+
+                    //*** IPhone5 中，使用 drawImage() 繪製的圖像在垂直方向上被壓扁(尺寸小於 1024*1024 的正常)，需要特殊處理。
+                    //*** 無法判斷 IPhone 的型號，只要是 IPhone 都做特殊處理。
+					if (event.target.width * event.target.height > 1024 * 1024 && (/iphone/i).test(navigator.userAgent)) {
+						var dblRatio = GetSquashRatioV(event.target);
+						objContext.drawImage(event.target,0,0,intWidth,intHeight/dblRatio);
+					}
+					else{
+						objContext.drawImage(event.target,0,0,intWidth,intHeight);
+					}
+
+					//DrawImageToCanvas(objCanvas,event.target);
+
+					//第一个参数是 image/jpeg，第二个参数压缩比例才有效。
+					var strBase64 = objCanvas.toDataURL("image/jpeg",0.8);
+					//var strBase64 = objCanvas.toDataURL("image/png",1);
+
+					document.getElementById("Img2").src = strBase64;
+					alert("压缩后，图片 base64 长度：" + strBase64.length);
+					console.log("压缩后，图片 base64 长度：" + strBase64.length);
+				}
+			};
+
+			/*
+			var objBlob = new Blob([file]);
+			var strBlobUrl = window.URL.createObjectURL(objBlob);
+			console.log(strBlobUrl);
+
+			var objImg = document.getElementById("Img1");
+			objImg.src = strBlobUrl;
+			objImg.onload = function(event){
+				var objCanvas = document.createElement("canvas");
+				//var objCanvas = document.getElementById("Canvas1");
+				var objContext = objCanvas.getContext("2d");
+				//objCanvas.width = 150;
+				//objCanvas.height = 150;
+				objCanvas.width = event.target.
+				objContext.drawImage(event.target,0,0,objCanvas.width,objCanvas.height);
+
+				//第一个参数是 image/jpeg，第二个参数压缩比例才有效。
+				var strBase64 = objCanvas.toDataURL("image/jpeg",1);
+				//var strBase64 = objCanvas.toDataURL("image/png",1);
+
+				document.getElementById("Img2").src = strBase64;
+			};
+			*/
+		}
+
+		//计算图片被画到 <canvas> 上时，垂直方向的压缩比例。
+        // Stack Overflow 上找到的計算方式，參考：
+        //      http://stackoverflow.com/questions/12554947/mobile-safari-renders-img-src-dataimage-jpegbase64-scaled-on-canvas
+		//params:
+		//	objImage:要绘制的图片，HTMLImageElement 类型。
+		//return: 压缩比例，0~1 之间。
+		function GetSquashRatioV(objImage) {
+			//必须使用 naturalHeight，取得图片的固有高度
+			var intHeight = objImage.naturalHeight;
+			var objCanvas = document.createElement("canvas");
+			objCanvas.width = 1;
+			objCanvas.height = intHeight;
+			var objCtx = objCanvas.getContext("2d");
+			objCtx.drawImage(objImage, 0, 0);
+			var data = objCtx.getImageData(0, 0, 1, intHeight).data;
+
+			// search image edge pixel position in case it is squashed vertically.
+			var sy = 0;
+			var ey = intHeight;
+			var py = intHeight;
+
+			while (py > sy) {
+				var alpha = data[py * 4 - 1];
+
+				if (alpha === 0) {
+					ey = py;
+				} else {
+					sy = py;
+				}
+
+				py = (ey + sy) >> 1;
+			}
+
+			var ratio = (py / intHeight);
+			return (ratio===0)?1:ratio;
+		}
+
+
+		//将图片分成若干部分，分步画到 <canvas> 上，不改变图片的宽高。
+		//params：
+		//	objCanvas:目标 <canvas> ，HTMLCanvasElement 类型。
+		//	objImage:将被绘制的图片，HTMLImageElement 类型。
+		//return: 无。
+		function DrawImageToCanvas(objCanvas,objImage){
+			//intSX:要绘制区域的 X 向坐标
+			var intSX = 0;
+			//intSY:要绘制区域的 Y 向坐标
+			var intSY = 0;
+			//intSW:要绘制区域的宽
+			var intSW = 1024;
+			//intSH:要绘制区域的高
+			var intSH = 1024;
+			//intWidth: objImage 的宽
+			var intWidth = objImage.width;
+			//intWidth: objImage 的高
+			var intHeight = objImage.height;
+
+			//设置 objCanvas 的宽、高
+			objCanvas.width = intWidth;
+			objCanvas.height = intHeight;
+
+			var objContext = objCanvas.getContext("2d");
+
+			//分割图片，并画到 objCanvas 上
+			while(intSX < intWidth){
+				//intSX + intSW 不能超过 objImage 的宽
+				if (intSX + intSW > intWidth){
+					intSW = intWidth - intSX;
+				}
+
+				intSY = 0;
+
+				while(intSY < intHeight){
+					//intSY + intSH 不能超过 objImage 的高
+					if (intSY + intSH > intHeight){
+						intSH = intHeight - intSY;
+					}
+
+					objContext.drawImage(objImage,intSX,intSY,intSW,intSH,intSX,intSY,intSW,intSH);
+					intSY += intSH;
+				}
+
+				intSX += intSW;
+			}
+		}
+	</script>
+</head>
+<body onload='Init();'>
+	<input type='file' id='ImageFile' />
+	<br/>
+	<img id='Img1' style='width:300px;height:300px;'/>
+	<img id='Img2' style='width:150px;height:150px;'/>
+	<br/>
+	<canvas id='Canvas1' width='500' height='500' style='border:1px solid black;'></canvas>
+</body>
+</html>
