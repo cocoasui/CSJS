@@ -3,6 +3,10 @@ html,body{
 	height:100%;
 	margin:0px;
 	box-sizing:border-box;
+    /* 加上 text-size-adjust，解决移动设备横置时，字体会变大的问题 */
+    text-size-adjust:none;
+    -webkit-text-size-adjust:none;
+    -ms-text-size-adjust:none;
 }
 
 div,span,label,input,select,table,tr,td,a,ul,ui,button,img,audio,video,object,embed{
